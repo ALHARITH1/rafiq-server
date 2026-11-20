@@ -26,5 +26,13 @@ jobs:
           context: src/server
           push: true
           platforms: linux/amd64
+          tags: ghcr.io/alharith1/rafiq-server:base
+          labels: org.opencontainers.image.source=https://github.com/ALHARITH1/rafiq-server
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.wrap
+          push: true
+          platforms: linux/amd64
           tags: ghcr.io/alharith1/rafiq-server:latest
           labels: org.opencontainers.image.source=https://github.com/ALHARITH1/rafiq-server
