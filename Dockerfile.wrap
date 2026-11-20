@@ -1,0 +1,4 @@
+FROM ghcr.io/alharith1/rafiq-server:base
+COPY entrypoint.sh /usr/local/bin/rafiq-entrypoint.sh
+RUN chmod +x /usr/local/bin/rafiq-entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/rafiq-entrypoint.sh"]
