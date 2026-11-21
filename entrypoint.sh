@@ -4,9 +4,9 @@ set -e
 
 python /usr/local/bin/rafiq_backup.py restore || echo "[entrypoint] restore failed, continuing"
 
-# periodic safety backup every 6h (covers crashes that skip the TERM trap)
+# periodic safety backup every 15 min (covers crashes that skip the TERM trap)
 if [ -n "$RESTORE_TOKEN" ] && [ -n "$BACKUP_PASSPHRASE" ]; then
-  ( while true; do sleep 21600; python /usr/local/bin/rafiq_backup.py push || true; done ) &
+  ( while true; do sleep 900; python /usr/local/bin/rafiq_backup.py push || true; done ) &
   LOOP_PID=$!
 fi
 
