@@ -24,8 +24,10 @@ import urllib.error
 DB = "/data/harith.db"
 TAG = "auto-backup"
 ASSET = "rafiq-latest.db.gz.fenc"
-SALT = b"rafiq-rolling-backup-v1"
-ITER = 600_000
+SALT = b"rafiq-rolling-backup-v2"
+ITER = 100_000
+SALT_V1 = b"rafiq-rolling-backup-v1"
+ITER_V1 = 600_000
 
 
 def repo():
@@ -59,14 +61,22 @@ def api(method, url, body=None, raw=None, accept="application/vnd.github+json"):
         raise
 
 
-def fernet():
+def fernet(salt=SALT, iterations=ITER):
     from cryptography.fernet import Fernet
     from cryptography.hazmat.primitives import hashes
     from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
     pw = os.environ["BACKUP_PASSPHRASE"].encode()
-    kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=SALT, iterations=ITER)
+    kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=salt, iterations=iterations)
     return Fernet(base64.urlsafe_b64encode(kdf.derive(pw)))
+
+
+def decrypt_any(enc):
+    from cryptography.fernet import InvalidToken
+    try:
+        return fernet().decrypt(enc)
+    except InvalidToken:
+        return fernet(SALT_V1, ITER_V1).decrypt(enc)
 
 
 def get_release(create=False):
@@ -86,6 +96,10 @@ def find_asset(rel):
 
 
 def push():
+    try:
+        os.nice(10)
+    except Exception:
+        pass
     if not os.path.exists(DB):
         print("[backup] no database file, skipping push", flush=True)
         return
@@ -115,7 +129,7 @@ def restore():
         print("[backup] restoring from rolling encrypted asset...", flush=True)
         enc = api("GET", f"https://api.github.com/repos/{repo()}/releases/assets/{asset['id']}",
                   accept="application/octet-stream")
-        plain = fernet().decrypt(enc)
+        plain = decrypt_any(enc)
         data = gzip.decompress(plain)
     else:
         url = os.environ.get("RESTORE_ASSET_URL", "")
