@@ -124,7 +124,7 @@ def restore():
             return
         print("[backup] restoring from initial plain asset...", flush=True)
         data = gzip.decompress(api("GET", url, accept="application/octet-stream"))
-    tmp = "/tmp/harith.db"
+    tmp = "/data/.harith.db.tmp"
     with open(tmp, "wb") as f:
         f.write(data)
     os.chmod(tmp, 0o600)
