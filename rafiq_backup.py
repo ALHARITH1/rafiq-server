@@ -101,6 +101,22 @@ def find_asset(rel, name=ASSET):
     return None
 
 
+def checkpoint_db():
+    """Flush WAL into the main db file so the plain copy below is complete.
+
+    The app keeps SQLite in WAL mode; copying harith.db alone drops every
+    write still sitting in harith.db-wal (lost row evidence: file id 202
+    metadata vanished on the 2026-11-21 container replace).
+    """
+    import sqlite3
+    try:
+        conn = sqlite3.connect(DB, timeout=60)
+        conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+        conn.close()
+    except Exception as e:
+        print(f"[backup] wal checkpoint failed ({e}); copying anyway", flush=True)
+
+
 def push():
     try:
         os.nice(10)
@@ -109,6 +125,7 @@ def push():
     if not os.path.exists(DB):
         print("[backup] no database file, skipping push", flush=True)
         return
+    checkpoint_db()
     with open(DB, "rb") as f:
         plain = f.read()
     buf = io.BytesIO()
