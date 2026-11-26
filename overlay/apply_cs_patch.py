@@ -18,7 +18,7 @@ p = Path('/app/harith/web.py'); s = p.read_text()
 needle = '    @asynccontextmanager\n    async def lifespan(_)'
 assert s.count(needle) == 1
 s = s.replace(needle, '    from .customer_service import routes as customer_service_routes\n    routes[0:0] = customer_service_routes(app, R, HTTPError, STATIC)\n\n' + needle)
-s = s.replace('("app.js", "biz.js", "pm.js", "style.css", "download.js")', '("app.js", "biz.js", "pm.js", "style.css", "download.js", "customer-service.js")')
+s = s.replace('("app.js", "biz.js", "pm.js", "style.css", "download.js")', '("app.js", "biz.js", "pm.js", "style.css", "download.js", "customer-service.js", "customer-chat.js")')
 needle = '                  "meetings", "audit"):'
 assert s.count(needle) == 1
 s = s.replace(needle, '                  "meetings", "audit", "cs_messages", "cs_answers", "cs_reports"):')

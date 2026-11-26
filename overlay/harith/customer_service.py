@@ -288,7 +288,8 @@ def routes(app, R, HTTPError, STATIC):
         messages = db.all("SELECT id,body,CASE WHEN reply_kind IN ('automatic','owner') THEN reply ELSE '' END reply,created_at FROM cs_messages WHERE user_id=? AND session_hash=? ORDER BY id DESC LIMIT 40", (uid, sh))
         return J({'session': session, 'messages': list(reversed(messages))}, headers={'Cache-Control': 'no-store'})
 
-    return [R('/api/customer-service', overview),
+    from .customer_connectors import routes as connector_routes
+    return connector_routes(app, R, HTTPError) + [R('/api/customer-service', overview),
             R('/api/customer-service/settings', settings, ['PUT']),
             R('/api/customer-service/answers', answers, ['POST']),
             R('/api/customer-service/answers/{id:int}/disable', disable_answer, ['POST']),

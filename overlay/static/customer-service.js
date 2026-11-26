@@ -58,7 +58,7 @@ async function customerServiceView() {
     if(m.source==='website')actions.append(button('إرسال النص إلى محادثة الموقع',async()=>{if(!confirm('هل تعتمد هذا النص وترسله إلى الزائر؟\n\n'+text.value))return;await api('PATCH',`/api/customer-service/messages/${m.id}`,{reply:text.value,deliver:true,status:'done'});await reload();}));
     inbox.append(el('article',{style:'padding:18px 0;border-top:1px solid var(--border)'},
       el('h3',{},'#'+m.id+' | '+data.channels.find(c=>c.id===m.channel).name+' | '+(m.customer||'عميل')),
-      el('span',{class:'chip'},m.source==='manual'?'إدخال يدوي':'رسالة من رابط الموقع'),
+      el('span',{class:'chip'},m.source==='manual'?'إدخال يدوي':m.source==='official'?'واردة عبر الربط الرسمي':'رسالة من رابط الموقع'),
       el('span',{class:m.status==='open'?'chip warn':'chip ok'},m.status==='open'?'للمتابعة':'مكتملة'),
       note(m.created_at),el('p',{style:'white-space:pre-wrap;overflow-wrap:anywhere'},m.body),
       note(m.reply_kind==='automatic'?'أُجيب تلقائياً بنص معتمد':m.reply_kind==='owner'?'أُرسل الرد إلى محادثة الموقع':'الرد أدناه مسودة فقط'),text,actions));
