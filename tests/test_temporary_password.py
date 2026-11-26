@@ -29,6 +29,12 @@ class TempPassword(unittest.TestCase):
   self.flag();self.assertEqual(self.c.get('/api/me',headers={'Authorization':'Bearer '+self.otoken}).status_code,403)
   self.assertEqual(self.c.get('/api/me',headers={'Authorization':'Bearer '+self.token}).status_code,200)
   self.assertFalse(self.a.db.get_setting(self.other,'password_change_required',False))
+ def test_short_temporary_only(self):
+  h={'Authorization':'Bearer '+self.token};url=f'/api/users/{self.owner}'
+  self.assertEqual(self.c.patch(url,json={'password':'4567'},headers=h).status_code,400)
+  self.assertEqual(self.c.patch(url,json={'password':'4567','password_change_required':True},headers=h).status_code,200)
+  self.assertTrue(self.c.post('/api/login',json={'username':'owner-test','password':'4567'}).json()['password_change_required'])
+  self.assertEqual(self.c.post('/api/password',json={'current':'4567','new':'5678'},headers={'X-Harith':'1'}).status_code,400)
  def test_nonadmin_cannot_flag(self):
   r=self.c.patch(f'/api/users/{self.other}',json={'password_change_required':True},headers={'Authorization':'Bearer '+self.otoken});self.assertEqual(r.status_code,403)
 if __name__=='__main__':unittest.main(verbosity=2)
